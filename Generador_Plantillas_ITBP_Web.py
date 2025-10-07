@@ -19,7 +19,7 @@ from googleapiclient.discovery import build
 
 # --- Configuración de OAUTH ---
 # Nota: Streamlit Cloud automáticamente buscará el archivo en la carpeta .streamlit/
-CLIENT_SECRETS_FILE = "secrets.toml" 
+CLIENT_SECRETS_FILE = ".streamlit/secrets.toml.txt" 
 SCOPES = ['https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile', 'openid']
 
 # ¡IMPORTANTE! Reemplaza esta URL con la URL final de tu aplicación en Streamlit Cloud
@@ -284,5 +284,6 @@ else:
                 mime="application/zip",
                 use_container_width=True
             )
+
 
 
