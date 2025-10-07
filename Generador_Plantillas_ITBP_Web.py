@@ -7,6 +7,73 @@ import requests
 import io
 import zipfile
 
+# --- CONFIGURACIÓN DE OAUTH ---
+
+# Define el archivo de secretos y el alcance (qué información pides)
+CLIENT_SECRETS_FILE = ".streamlit/secrets.toml" # Asegúrate que el path sea correcto si es necesario
+SCOPES = ['https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile', 'openid']
+REDIRECT_URI = "https://generador-plantillas-itbp.streamlit.app/" # ¡DEBE COINCIDIR CON LA CONFIGURACIÓN EN GCP!
+# Para desarrollo local, comentar la línea de arriba y descomentar la de abajo:
+# REDIRECT_URI = "http://localhost:8501/"
+
+# Función para crear el objeto de flujo de OAuth
+def create_oauth_flow():
+    return Flow.from_client_secrets_file(
+        CLIENT_SECRETS_FILE,
+        scopes=SCOPES,
+        redirect_uri=REDIRECT_URI
+    )
+
+# --- LÓGICA DE LA APLICACIÓN ---
+
+# Revisa si la información del usuario ya está en la sesión
+if 'user_info' not in st.session_state:
+    # Revisa si hay un código de autorización en la URL
+    query_params = st.query_params
+    auth_code = query_params.get("code")
+
+    if not auth_code:
+        # Si no hay código, muestra el botón de login
+        flow = create_oauth_flow()
+        authorization_url, _ = flow.authorization_url()
+        st.link_button("Iniciar sesión con Google", authorization_url)
+    else:
+        # Si hay código, intercámbialo por un token y obtén los datos del usuario
+        try:
+            flow = create_oauth_flow()
+            flow.fetch_token(code=auth_code)
+            credentials = flow.credentials
+
+            # Usa el token para acceder a la API de Google y obtener info del usuario
+            user_info_service = build('oauth2', 'v2', credentials=credentials)
+            user_info = user_info_service.userinfo().get().execute()
+
+            # Guarda la info del usuario en el estado de la sesión
+            st.session_state.user_info = user_info
+
+            # Limpia los parámetros de la URL y re-ejecuta el script
+            st.query_params.clear()
+            st.rerun()
+
+        except Exception as e:
+            st.error(f"Error durante la autenticación: {e}")
+            st.stop()
+else:
+    # --- USUARIO AUTENTICADO ---
+    user_info = st.session_state.user_info
+
+    # Opcional: Restringir acceso solo a usuarios de tu dominio empresarial
+    if user_info.get('hd') != 'Kushki':
+        st.error("Acceso denegado. Por favor, inicia sesión con una cuenta de 'Kushki'.")
+        if st.button("Cerrar sesión"):
+            del st.session_state.user_info
+            st.rerun()
+    else:
+        # Muestra la bienvenida y el botón de logout
+        st.write(f'Bienvenido *{user_info["name"]}* ({user_info["email"]})')
+        if st.button("Cerrar sesión"):
+            del st.session_state.user_info
+            st.rerun()
 # --- INICIO DE LA LÓGICA DE PROCESAMIENTO ORIGINAL ---
 # Estas funciones contienen la lógica principal de tu script y se mantienen intactas.
 
@@ -294,4 +361,5 @@ if st.session_state.archivos_generados_zip:
         file_name=zip_filename,
         mime="application/zip"
     )
+
 
