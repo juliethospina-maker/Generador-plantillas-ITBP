@@ -202,7 +202,7 @@ def create_zip_buffer(archivos_generados):
 
 st.set_page_config(page_title="Generador Plantillas ITBP", layout="wide")
 st.title("📄 Generador Plantillas ITBP")
-st.write("Esta herramienta procesa los archivos 'Detalle_liquidación' para generar las plantillas contanbles de 'Procesado' y 'Revenue'.")
+st.write("Esta herramienta procesa los archivos 'Detalle_liquidación' para generar las plantillas contables de 'Procesado' y 'Revenue'.")
 
 # Inicializar el estado de la sesión para guardar los archivos generados
 if 'archivos_generados_zip' not in st.session_state:
@@ -294,3 +294,4 @@ if st.session_state.archivos_generados_zip:
         file_name=zip_filename,
         mime="application/zip"
     )
+
