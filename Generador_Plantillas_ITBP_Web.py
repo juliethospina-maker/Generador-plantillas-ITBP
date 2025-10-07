@@ -19,7 +19,7 @@ from googleapiclient.discovery import build
 
 # --- Configuración de OAUTH ---
 # Nota: Streamlit Cloud automáticamente buscará el archivo en la carpeta .streamlit/
-CLIENT_SECRETS_FILE = ".streamlit/secrets.toml" 
+CLIENT_SECRETS_FILE = "/secrets.toml" 
 SCOPES = ['https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile', 'openid']
 
 # ¡IMPORTANTE! Reemplaza esta URL con la URL final de tu aplicación en Streamlit Cloud
@@ -28,7 +28,7 @@ REDIRECT_URI = "https://generador-plantillas-itbp.streamlit.app/"
 # REDIRECT_URI = "http://localhost:8501/"
 
 # ¡IMPORTANTE! Reemplaza 'tuempresa.com' con el dominio de tu organización
-AUTHORIZED_DOMAIN = "tuempresa.com"
+AUTHORIZED_DOMAIN = "Kushki"
 
 # ===================================================================
 # --- 3. DEFINICIÓN DE FUNCIONES ---
@@ -284,3 +284,4 @@ else:
                 mime="application/zip",
                 use_container_width=True
             )
+
