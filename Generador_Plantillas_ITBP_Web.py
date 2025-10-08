@@ -174,11 +174,11 @@ if 'user_info' not in st.session_state:
 
     if not auth_code:
         try:
-         flow = create_oauth_flow()
-         authorization_url, _ = flow.authorization_url()
-         st.link_button("▶️ Iniciar sesión con Google", authorization_url, use_container_width=True)
+            flow = create_oauth_flow()
+            authorization_url, _ = flow.authorization_url()
+            st.link_button("▶️ Iniciar sesión con Google", authorization_url, use_container_width=True)
         except Exception as e:
-         st.error(f"No se pudo crear el flujo de autenticación: {e}")
+            st.error(f"No se pudo crear el flujo de autenticación: {e}")
 
     else:
         # Si hay código, intercámbialo por un token y obtén los datos del usuario
@@ -288,3 +288,4 @@ else:
                 mime="application/zip",
                 use_container_width=True
             )
+
