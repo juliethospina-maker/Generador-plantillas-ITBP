@@ -220,7 +220,7 @@ else:
                 st.rerun()
         
         # Contenido principal de la aplicación
-        st.title("📄 Generador de Reportes ITBP")
+        st.title("📄 Generador de Plantillas ITBP")
         st.write("Esta herramienta procesa los archivos 'Detalle_liquidación' para generar los reportes de 'Procesado' y 'Revenue'.")
 
         if 'archivos_generados_zip' not in st.session_state:
@@ -288,6 +288,7 @@ else:
                 mime="application/zip",
                 use_container_width=True
             )
+
 
 
 
