@@ -28,7 +28,7 @@ REDIRECT_URI = "https://generador-plantillas-itbp.streamlit.app/"
 # REDIRECT_URI = "http://localhost:8501/"
 
 # ¡IMPORTANTE! Reemplaza 'tuempresa.com' con el dominio de tu organización
-AUTHORIZED_DOMAIN = "Kushki"
+AUTHORIZED_DOMAIN = "Kushki.com"
 
 # ===================================================================
 # --- 3. DEFINICIÓN DE FUNCIONES ---
@@ -288,6 +288,7 @@ else:
                 mime="application/zip",
                 use_container_width=True
             )
+
 
 
 
