@@ -167,14 +167,13 @@ if 'user_info' not in st.session_state:
         st.title("Bienvenido al Generador de Reportes ITBP")
         st.write("Por favor, inicia sesión con tu cuenta de Google para continuar.")
         try:
-            flow = create_oauth_flow()
-            authorization_url, _ = flow.authorization_url()
-            # Usamos st.link_button para una mejor apariencia
-            st.link_button("▶️ Iniciar sesión con Google", authorization_url, use_container_width=True)
-        except FileNotFoundError:
-            st.error("Archivo de secretos no encontrado. Asegúrate que '.streamlit/secrets.toml' existe.")
-        except Exception as e:
-            st.error(f"No se pudo crear el flujo de autenticación: {e}")
+       flow = create_oauth_flow()
+         authorization_url, _ = flow.authorization_url()
+         st.link_button("▶️ Iniciar sesión con Google", authorization_url, use_container_width=True)
+     except Exception as e:
+         st.error("No se pudo crear el flujo de autenticación.")
+         # Esta línea mostrará el error técnico detallado. ¡Es la pista que necesitamos!
+         st.exception(e) 
 
     else:
         # Si hay código, intercámbialo por un token y obtén los datos del usuario
@@ -284,6 +283,7 @@ else:
                 mime="application/zip",
                 use_container_width=True
             )
+
 
 
 
