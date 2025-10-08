@@ -35,10 +35,20 @@ AUTHORIZED_DOMAIN = "Kushki"
 # ===================================================================
 
 def create_oauth_flow():
-    """Crea el objeto de flujo de OAuth a partir de los secretos."""
-    # Esta función ahora puede encontrar las constantes porque están definidas antes.
-    return Flow.from_client_secrets_file(
-        CLIENT_SECRETS_FILE,
+"""Crea el flujo OAuth usando st.secrets en lugar de un archivo."""
+# Preparamos la configuración que necesita la función a partir de st.secrets
+    client_config = {
+        "web": {
+            "client_id": st.secrets["GOOGLE_CLIENT_ID"],
+            "client_secret": st.secrets["GOOGLE_CLIENT_SECRET"],
+            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+            "token_uri": "https://oauth2.googleapis.com/token",
+            "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+        }
+    }
+    
+    return Flow.from_client_config(
+        client_config=client_config,
         scopes=SCOPES,
         redirect_uri=REDIRECT_URI
     )
@@ -163,17 +173,12 @@ if 'user_info' not in st.session_state:
     auth_code = query_params.get("code")
 
     if not auth_code:
-        # Si no hay código, muestra el botón de login
-        st.title("Bienvenido al Generador de Reportes ITBP")
-        st.write("Por favor, inicia sesión con tu cuenta de Google para continuar.")
         try:
          flow = create_oauth_flow()
          authorization_url, _ = flow.authorization_url()
          st.link_button("▶️ Iniciar sesión con Google", authorization_url, use_container_width=True)
         except Exception as e:
-         st.error("No se pudo crear el flujo de autenticación.")
-         # Esta línea mostrará el error técnico detallado. ¡Es la pista que necesitamos!
-         st.exception(e) 
+         st.error(f"No se pudo crear el flujo de autenticación: {e}")
 
     else:
         # Si hay código, intercámbialo por un token y obtén los datos del usuario
@@ -283,6 +288,7 @@ else:
                 mime="application/zip",
                 use_container_width=True
             )
+
 
 
 
