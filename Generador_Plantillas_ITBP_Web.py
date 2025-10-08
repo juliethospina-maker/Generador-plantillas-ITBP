@@ -31,8 +31,8 @@ def create_oauth_flow():
     """Crea el flujo OAuth usando st.secrets."""
     client_config = {
         "web": {
-            "client_id": st.secrets["GOOGLE_CLIENT_ID"],
-            "client_secret": st.secrets["GOOGLE_CLIENT_SECRET"],
+            "client_id": st.secrets["12899773955-mebjir61chs3do3jd21hi97141hlu64q.apps.googleusercontent.com"],
+            "client_secret": st.secrets["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"],
             "auth_uri": "https://accounts.google.com/o/oauth2/auth",
             "token_uri": "https://oauth2.googleapis.com/token",
             "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
@@ -263,6 +263,7 @@ else:
                 mime="application/zip",
                 use_container_width=True
             )
+
 
 
 
