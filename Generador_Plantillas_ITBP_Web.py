@@ -221,7 +221,7 @@ else:
         
         # Contenido principal de la aplicación
         st.title("📄 Generador de Plantillas ITBP")
-        st.write("Esta herramienta procesa los archivos 'Detalle_liquidación' para generar los reportes de 'Procesado' y 'Revenue'.")
+        st.write("Esta herramienta procesa los archivos 'Detalle_liquidación' para generar las Plantillas contables de 'Procesado' y 'Revenue'.")
 
         if 'archivos_generados_zip' not in st.session_state:
             st.session_state.archivos_generados_zip = None
@@ -288,6 +288,7 @@ else:
                 mime="application/zip",
                 use_container_width=True
             )
+
 
 
 
