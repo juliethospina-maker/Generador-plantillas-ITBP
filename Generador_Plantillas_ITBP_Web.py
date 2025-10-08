@@ -35,8 +35,8 @@ AUTHORIZED_DOMAIN = "Kushki"
 # ===================================================================
 
 def create_oauth_flow():
-"""Crea el flujo OAuth usando st.secrets en lugar de un archivo."""
-# Preparamos la configuración que necesita la función a partir de st.secrets
+ """Crea el flujo OAuth usando st.secrets en lugar de un archivo."""
+ # Preparamos la configuración que necesita la función a partir de st.secrets
     client_config = {
         "web": {
             "client_id": st.secrets["GOOGLE_CLIENT_ID"],
@@ -288,6 +288,7 @@ else:
                 mime="application/zip",
                 use_container_width=True
             )
+
 
 
 
