@@ -1,5 +1,5 @@
 # ===================================================================
-# --- 1. IMPORTS ---
+# --- 1. IMPORTS (TODOS JUNTOS AL PRINCIPIO) ---
 # ===================================================================
 import streamlit as st
 import pandas as pd
@@ -17,10 +17,17 @@ from googleapiclient.discovery import build
 # --- 2. CONFIGURACIÓN DE CONSTANTES GLOBALES ---
 # ===================================================================
 
-# --- Configuración de OAUTH para Google ---
+# --- Configuración de OAUTH ---
+# Nota: Streamlit Cloud automáticamente buscará el archivo en la carpeta .streamlit/
+CLIENT_SECRETS_FILE = ".streamlit/secrets.toml" 
 SCOPES = ['https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile', 'openid']
-REDIRECT_URI = "https://generador-plantillas-itbp.streamlit.app/" # ¡URL de tu app desplegada!
-# REDIRECT_URI = "http://localhost:8501/" # Para desarrollo local
+
+# ¡IMPORTANTE! Reemplaza esta URL con la URL final de tu aplicación en Streamlit Cloud
+REDIRECT_URI = "https://generador-plantillas-itbp.streamlit.app/" 
+# Para desarrollo local, comenta la línea de arriba y descomenta la de abajo:
+# REDIRECT_URI = "http://localhost:8501/"
+
+# ¡IMPORTANTE! Reemplaza 'tuempresa.com' con el dominio de tu organización
 AUTHORIZED_DOMAIN = "kushkipagos.com"
 
 # ===================================================================
@@ -28,28 +35,33 @@ AUTHORIZED_DOMAIN = "kushkipagos.com"
 # ===================================================================
 
 def create_oauth_flow():
-    """Crea el flujo OAuth usando st.secrets."""
-    client_config = {
+ """Crea el flujo OAuth usando st.secrets en lugar de un archivo."""
+ # Preparamos la configuración que necesita la función a partir de st.secrets
+ client_config = {
         "web": {
-            "client_id": st.secrets["12899773955-mebjir61chs3do3jd21hi97141hlu64q.apps.googleusercontent.com"],
-            "client_secret": st.secrets["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"],
+            "client_id": st.secrets["GOOGLE_CLIENT_ID"],
+            "client_secret": st.secrets["GOOGLE_CLIENT_SECRET"],
             "auth_uri": "https://accounts.google.com/o/oauth2/auth",
             "token_uri": "https://oauth2.googleapis.com/token",
             "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
         }
     }
-    return Flow.from_client_config(
-        client_config=client_config, scopes=SCOPES, redirect_uri=REDIRECT_URI
+    
+ return Flow.from_client_config(
+        client_config=client_config,
+        scopes=SCOPES,
+        redirect_uri=REDIRECT_URI
     )
 
-# --- (Aquí van todas tus funciones de procesamiento de datos intactas) ---
 def to_excel_buffer(df):
+    """Convierte un DataFrame a un buffer de Excel en memoria."""
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
         df.to_excel(writer, index=False, sheet_name='Sheet1')
     return output.getvalue()
 
 def create_zip_buffer(archivos_generados):
+    """Toma una lista de (nombre_archivo, dataframe) y crea un archivo ZIP en memoria."""
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
         for nombre_archivo, df in archivos_generados:
@@ -57,17 +69,25 @@ def create_zip_buffer(archivos_generados):
             zip_file.writestr(nombre_archivo, excel_buffer)
     return zip_buffer.getvalue()
 
+# --- Funciones de Lógica de Negocio Original ---
 def get_output_group_date(date):
-    if date.weekday() >= 4: return (date + pd.Timedelta(days=6 - date.weekday())).date()
-    else: return date.date()
+    if date.weekday() >= 4:
+        return (date + pd.Timedelta(days=6 - date.weekday())).date()
+    else:
+        return date.date()
 
 def load_catalogs_from_url(url):
     try:
         response = requests.get(url, timeout=15)
         response.raise_for_status()
         file_content = io.BytesIO(response.content)
-        catalogs = {'itbp': pd.read_excel(file_content, sheet_name='ITBP', engine='openpyxl'), 'txn': pd.read_excel(file_content, sheet_name='Transaction Type', engine='openpyxl'), 'procesadora': pd.read_excel(file_content, sheet_name='Procesadora', engine='openpyxl')}
-        if 'Pais' in catalogs['procesadora'].columns: catalogs['procesadora'].rename(columns={'Pais': 'País'}, inplace=True)
+        catalogs = {
+            'itbp': pd.read_excel(file_content, sheet_name='ITBP', engine='openpyxl'),
+            'txn': pd.read_excel(file_content, sheet_name='Transaction Type', engine='openpyxl'),
+            'procesadora': pd.read_excel(file_content, sheet_name='Procesadora', engine='openpyxl')
+        }
+        if 'Pais' in catalogs['procesadora'].columns:
+            catalogs['procesadora'].rename(columns={'Pais': 'País'}, inplace=True)
         return catalogs
     except Exception as e:
         st.error(f"Error al cargar catálogos: {e}")
@@ -75,7 +95,7 @@ def load_catalogs_from_url(url):
 
 def process_and_generate_files(df_chunk, pais_actual, grupo_fecha, catalogs):
     st.info(f"Procesando País: {pais_actual} | Fecha Grupo: {grupo_fecha.strftime('%Y-%m-%d')}...")
-    # (El resto de esta larga función de procesamiento se mantiene igual)
+    # (El resto de esta función de procesamiento masivo se mantiene igual que en versiones anteriores)
     COLUMNAS_PROCESADO = ['Tipo mov.','Nº cuenta','Fecha registro','Tipo documento','Nº documento','Descripción','Importe','Importe debe','Importe haber','Cód. términos pago','Tipo de registro gen.','Nº documento externo','PostingGroup2','Prepayment','Tipo contrapartida','Cta. Contrapartida','DIM 1','DIM 2','DIM 3','DIM 4','DIM 5','DIM 6','DIM 7','DIM 8','VAT\xa0Registration\xa0Type\xa0KCP','VAT\xa0Registration\xa0No."','Cód. divisa']
     COLUMNAS_REVENUE = ['Tipo mov.','Nº cuenta','Fecha registro','Tipo documento','Nº documento','Descripción','Importe','Importe debe','Importe haber','Cód. términos pago','Tipo de registro gen.','Nº documento externo','PostingGroup2','Prepayment','Tipo contrapartida','Cta. Contrapartida','DIM 1','DIM 2','DIM 3','DIM 4','DIM 5','DIM 6','DIM 7','DIM 8','VAT\xa0Registration\xa0Type\xa0KCP','VAT\xa0Registration\xa0No."','Cód. divisa']
     df_catalogo_itbp = catalogs['itbp']
@@ -142,7 +162,7 @@ def process_and_generate_files(df_chunk, pais_actual, grupo_fecha, catalogs):
     return (nombre_archivo_procesado, df_reporte_procesado), (nombre_archivo_revenue, df_reporte_revenue)
 
 # ===================================================================
-# --- 4. LÓGICA PRINCIPAL DE LA APLICACIÓN (SOLO GOOGLE LOGIN) ---
+# --- 4. LÓGICA PRINCIPAL DE LA APLICACIÓN (EL "PORTERO") ---
 # ===================================================================
 
 st.set_page_config(page_title="Generador ITBP", layout="wide")
@@ -153,18 +173,15 @@ if 'user_info' not in st.session_state:
     auth_code = query_params.get("code")
 
     if not auth_code:
-        # Si no hay código de autorización, muestra la pantalla de bienvenida y el botón de login
-        st.title("Bienvenido al Generador de Reportes ITBP")
-        st.write("Por favor, inicia sesión con tu cuenta de Google para continuar.")
         try:
-            flow = create_oauth_flow()
-            authorization_url, _ = flow.authorization_url()
-            st.link_button("▶️ Iniciar sesión con Google", authorization_url, use_container_width=True)
+         flow = create_oauth_flow()
+         authorization_url, _ = flow.authorization_url()
+         st.link_button("▶️ Iniciar sesión con Google", authorization_url, use_container_width=True)
         except Exception as e:
-            st.error("No se pudo crear el flujo de autenticación.")
-            st.exception(e)
+         st.error(f"No se pudo crear el flujo de autenticación: {e}")
+
     else:
-        # Si hay un código, intercámbialo por un token y obtén los datos del usuario
+        # Si hay código, intercámbialo por un token y obtén los datos del usuario
         try:
             flow = create_oauth_flow()
             flow.fetch_token(code=auth_code)
@@ -174,7 +191,7 @@ if 'user_info' not in st.session_state:
             user_info = user_info_service.userinfo().get().execute()
             
             st.session_state.user_info = user_info
-            st.query_params.clear() # Limpia la URL para evitar re-logins accidentales
+            st.query_params.clear()
             st.rerun()
 
         except Exception as e:
@@ -191,7 +208,9 @@ else:
             del st.session_state.user_info
             st.rerun()
     else:
-        # --- LÓGICA PRINCIPAL DE LA APLICACIÓN (CONTENIDO PROTEGID) ---
+        # --- LÓGICA PRINCIPAL DE LA APLICACIÓN (CONTENIDO PROTEGIDO) ---
+        
+        # Barra lateral con información del usuario y botón de logout
         with st.sidebar:
             st.write(f"Conectado como:")
             st.success(f"**{user_info['name']}**")
@@ -217,23 +236,28 @@ else:
             st.success(f"Cargaste {len(uploaded_files)} archivo(s). ¡Listo para procesar!")
 
         if st.button("🚀 Generar Reportes", disabled=not uploaded_files):
-            # ... (Toda tu lógica de procesamiento va aquí, sin cambios) ...
             with st.spinner("Procesando y empaquetando... Esto puede tardar unos momentos."):
                 google_sheet_url = "https://docs.google.com/spreadsheets/d/1WqXYeykuKGfi1Ho5MAFGB52tRIMndIJ_/export?format=xlsx"
                 st.info("Descargando catálogos...")
                 catalogs = load_catalogs_from_url(google_sheet_url)
+
                 if catalogs:
                     st.success("Catálogos cargados correctamente.")
                     lista_df_detalle = [pd.read_excel(file) for file in uploaded_files]
                     df_detalle_consolidado = pd.concat(lista_df_detalle, ignore_index=True)
                     st.info("Archivos de detalle consolidados.")
+                    
+                    # Lógica de negocio (ajuste para Chile)
                     condicion_descarte_mid = (df_detalle_consolidado['merchant_id'] == '20000000107065050000') & (df_detalle_consolidado['processor_name'].str.strip().str.upper() != 'KUSHKI ACQUIRER PROCESSOR')
                     df_detalle_consolidado = df_detalle_consolidado[~condicion_descarte_mid].copy()
                     condicion_kushki = (df_detalle_consolidado['country'].str.strip().str.upper() == 'CHILE') & (df_detalle_consolidado['processor_name'].str.strip().str.upper() == 'KUSHKI ACQUIRER PROCESSOR')
                     df_detalle_consolidado.loc[condicion_kushki, 'country'] = 'Chile Operadora'
+                    
+                    # Procesamiento principal
                     df_detalle_consolidado['createddate'] = pd.to_datetime(df_detalle_consolidado['createddate'])
                     df_detalle_consolidado['fecha_pago'] = pd.to_datetime(df_detalle_consolidado['fecha_pago'], errors='coerce')
                     df_detalle_consolidado['output_group'] = df_detalle_consolidado['createddate'].apply(get_output_group_date)
+                    
                     archivos_generados = []
                     for pais in df_detalle_consolidado['country'].unique():
                         df_pais = df_detalle_consolidado[df_detalle_consolidado['country'] == pais].copy()
@@ -243,12 +267,13 @@ else:
                             if resultado_procesado and resultado_revenue:
                                 archivos_generados.append(resultado_procesado)
                                 archivos_generados.append(resultado_revenue)
+                    
                     if archivos_generados:
                         st.session_state.archivos_generados_zip = archivos_generados
                     else:
                         st.session_state.archivos_generados_zip = None
                         st.warning("No se generaron archivos con los datos proporcionados.")
-        
+
         if st.session_state.archivos_generados_zip:
             st.success("🎉 ¡Proceso completado! 🎉")
             st.balloons()
@@ -263,7 +288,3 @@ else:
                 mime="application/zip",
                 use_container_width=True
             )
-
-
-
-
