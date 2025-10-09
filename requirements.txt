@@ -7,3 +7,7 @@ google-auth
 google-auth-oauthlib
 google-api-python-client
 PyYAML
+os
+io
+zipfile
+google.oauth2.credentials
